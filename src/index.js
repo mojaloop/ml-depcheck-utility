@@ -29,120 +29,104 @@ const configPath = path.resolve(__dirname, '../config/default.json')
 const config = JSON.parse(fs.readFileSync(configPath, 'utf8'))
 
 const mode = process.env.MODE || config.mode
+let count = 0; // Counter for deprecated packages
+let output="";
 
-function execCommandSync (command) {
-  const [cmd, ...args] = command.split(' ')
-  const result = spawnSync(cmd, args, { encoding: 'utf-8', shell: false })
-
-  if (result.error) {
-    throw result.error
-  }
-  if (result.status !== 0) {
-    throw new Error(result.stderr || `Command failed with exit code ${result.status}`)
-  }
-  return result.stdout
+function getDependencies(checkTransitive = false) {
+    const args = checkTransitive ? ["ls", "--all", "--json"] : ["ls", "--json"];
+    const output = spawnSync("npm", args, { encoding: "utf8" }).stdout;
+    return JSON.parse(output).dependencies || {};
 }
 
-const dependenciesMap = new Map()
-const regex = /(?:@[\w-]+\/)?[\w.-]{1,100}@\d{1,10}\.\d{1,10}\.\d{1,10}(?:[-+][\w.-]{1,50})?/g
+async function checkPackage(pkgName, version, level) {
+    try {
+        const viewProcess = spawnSync("npm", ["view", `${pkgName}@${version}`, "--json"], { encoding: "utf8" });
+        const viewOutput = viewProcess.stdout;
 
-function checkDependencySync (dependency) {
-  if (dependenciesMap.has(dependency)) return
-  try {
-    const output = execCommandSync(`npm view ${dependency}`)
-    if (output.includes('DEPRECATED')) {
-      dependenciesMap.set(dependency, 'DEPRECATED')
-    } else {
-      dependenciesMap.set(dependency, 'active')
+        if (!viewOutput.trim()) {
+            output+=`UNKNOWN: ${pkgName}@${version}\n`;
+            return;
+        }
+
+        const packageInfo = JSON.parse(viewOutput);
+
+        if (packageInfo.deprecated) {
+            count++;
+            output+=`${count}: ${pkgName}@${version} \n\tReason: ${packageInfo.deprecated}\n`;
+
+        }
+    } catch (err) {
+        output+=err.message;
     }
-  } catch (error) {
-    dependenciesMap.set(dependency, 'UNKNOWN')
-  }
 }
 
-function processLinesSync (lines) {
-  for (const line of lines) {
-    const trimmedLine = line.trim()
-    const matches = trimmedLine.matchAll(regex)
-
-    for (const match of matches) {
-      const dependency = match[0]
-      checkDependencySync(dependency)
+function getAllPackages(deps, collected = {}) {
+    for (const [name, info] of Object.entries(deps)) {
+        const version = info.version;
+        if (name && version && !collected[`${name}@${version}`]) {
+            collected[`${name}@${version}`] = true;
+            if (info.dependencies) getAllPackages(info.dependencies, collected);
+        }
     }
-  }
+    return Object.keys(collected);
 }
 
-function checkDependenciesSync (command) {
-  try {
-    const stdout = execCommandSync(command)
-    const lines = stdout.trim().split('\n')
-    processLinesSync(lines)
-  } catch (error) {
-    const errorLines = error.toString().trim().split('\n')
-    processLinesSync(errorLines)
-  }
+async function checkDependencies() {
+    console.log("\x1b[34mChecking root dependencies...\x1b[0m");
+    output="";
+    const rootDependencies = getDependencies(false);
+    const rootPackageList = Object.entries(rootDependencies).map(([name, info]) => `${name}@${info.version}`);
+
+    await Promise.all(rootPackageList.map(pkg => {
+        const [pkgName, version] = pkg.split("@");
+        return checkPackage(pkgName, version, "root");
+    }));
+    if(mode=='warning'){
+        if (count > 0) {
+            output+='\x1b[33mWARNING!! Deprecated results found at root level.\n\x1b[0m';
+        } else {
+            output+='\x1b[32mSUCCESS: No deprecated packages found at root level! Congos!!\n\x1b[0m';
+        }
+    }
+    else{
+        if (count > 0) {
+            output+='\x1b[31mERROR!! Deprecated results found at root level.\n\x1b[0m';
+        } else {
+            output+='\x1b[32mSUCCESS: No deprecated packages found at root level! Congos!!\n\x1b[0m';
+        }
+    }
+    console.log(output);
+
+    console.log("\x1b[34m\nChecking all transitive dependencies...\x1b[0m");
+    output="";
+    const allDependencies = getDependencies(true);
+    const allPackageList = getAllPackages(allDependencies);
+
+    await Promise.all(allPackageList.map(pkg => {
+        const [pkgName, version] = pkg.split("@");
+        return checkPackage(pkgName, version, "transitive");
+    }));
+
+    if(mode=='warning'){
+        if (count > 0) {
+            output+='\x1b[33mWARNING!! Deprecated results found in dependencies.\n\x1b[0m';
+        } else {
+            output+='\x1b[32mSUCCESS: No deprecated packages found! Congos!!\x1b[0m';
+        }
+    }
+    else{
+        if (count > 0) {
+            output+='\x1b[31mERROR!! Deprecated results found in dependencies.\n\x1b[0m';
+        } else {
+            output+='\x1b[32mSUCCESS: No deprecated packages found! Congos!!\x1b[0m';
+        }
+    }
+    console.log(output);
+   
+
+    if (mode === "error" && count > 0) {
+        process.exit(1);
+    }
 }
 
-function runDependencyCheck () {
-  let errorOccurred = false // Track if any errors occurred
-
-  console.log('Checking dependencies at root level...')
-  checkDependenciesSync('npm ls')
-
-  let deprecatedFound = false
-  let counter = 0
-  dependenciesMap.forEach((status, dependency) => {
-    if (status === 'DEPRECATED') {
-      counter++
-      deprecatedFound = true
-      console.log(`${counter}. ${dependency} ${status}`)
-    }
-  })
-
-  if (deprecatedFound) {
-    if (mode === 'error') {
-      console.error('\x1b[31mERROR!! Deprecated results found at root level.\n\x1b[0m')
-      errorOccurred = true // Set the error state
-    } else {
-      console.log('\x1b[33mWARNING!! Deprecated results found at root level.\n\x1b[0m')
-    }
-  } else {
-    console.log('\x1b[32mSUCCESS: No deprecated packages found at root level! Congos!!\n\x1b[0m')
-  }
-
-  console.log('Checking all dependencies (including transitive)...')
-  checkDependenciesSync('npm ls --all')
-
-  deprecatedFound = false
-  counter = 0
-  dependenciesMap.forEach((status, dependency) => {
-    if (status === 'DEPRECATED') {
-      counter++
-      deprecatedFound = true
-      console.log(`${counter}. ${dependency} ${status}`)
-    }
-  })
-
-  if (deprecatedFound) {
-    if (mode === 'error') {
-      console.error('\x1b[31mERROR!! Deprecated results found in dependencies.\n\x1b[0m')
-      errorOccurred = true // Set the error state
-    } else {
-      console.log('\x1b[33mWARNING!! Deprecated results found in dependencies.\n\x1b[0m')
-    }
-  } else {
-    console.log('\x1b[32mSUCCESS: No deprecated packages found! Congos!!\x1b[0m')
-  }
-
-  // At the end of execution, handle the error state if needed
-  if (errorOccurred) {
-    console.error('\x1b[31mProcess completed with errors due to deprecated dependencies.\x1b[0m')
-    if (mode === 'error') {
-      process.exit(1) // Exit with an error code after finishing everything
-    }
-  }
-}
-
-module.exports = {
-  runDependencyCheck
-}
+module.exports = { checkDependencies };
