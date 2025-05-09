@@ -1,0 +1,21 @@
+{
+    "npm": [
+      "account-lookup-service",
+      "auth-service",
+      "bulk-api-adapter",
+      "central-event-processor",
+      "central-ledger",
+      "central-settlement",
+      "event-sidecar",
+      "event-stream-processor",
+      "inter-scheme-proxy-adapter",
+      "ml-api-adapter",
+      "quoting-service",
+      "thirdparty-api-svc",
+      "thirdparty-sdk",
+      "transaction-requests-service"
+    ],
+    "yarn": [
+      "sdk-scheme-adapter"
+    ]
+  }

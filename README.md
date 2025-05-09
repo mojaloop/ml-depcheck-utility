@@ -100,3 +100,110 @@ Checking transitive dev dependecies...
 
 CONGOS!!! No deprecated dependencies are found!
 ```
+
+# SBOM Generation Tool for Mojaloop Repositories
+
+## What is an SBOM?
+
+A **Software Bill of Materials (SBOM)** is a detailed inventory of all the components, libraries, and dependencies used in a software project. It provides critical insights into the dependencies' status, licenses, authors, and other metadata, helping to ensure transparency and security in the software supply chain.
+
+## About This Tool
+
+This tool enables **comprehensive SBOM generation** for Mojaloop repositories. It supports **both npm and yarn repositories** and provides detailed reports on dependencies for each individual repository, as well as an aggregated SBOM for all repositories.
+
+---
+
+## Features
+
+### 1. **Flexible Repository Inclusion**
+
+The repositories to be included in the SBOM generation process can be configured in two ways:
+
+- **Default Configuration**: The repositories are listed in the file:  
+  **`config/repo-list.json`**
+- **Custom Repository List**: You can also pass a custom repository list file from the command line. For example:
+  ```bash
+  bash src/generate-sbom.sh custom-repos-list.json
+  ```
+  This feature allows you to dynamically specify repositories for SBOM generation.
+
+### 2. **Individual SBOMs for Each Repository**
+
+For every Mojaloop repository, a detailed SBOM is generated. It includes:
+
+- A comprehensive list of dependencies.
+- Metadata such as:
+  - Status
+  - License
+  - Version Control System (VCS) information
+  - Author details
+- All **transitive dependencies** (dependencies of dependencies).
+
+The individual SBOMs are stored in:  
+**`data/sbom-repo-wise/`**
+
+### 3. **Aggregated SBOM for All Repositories**
+
+At the end of the process, an aggregated SBOM is generated. This SBOM:
+
+- Maps dependencies to the Mojaloop services utilizing them.
+- Includes additional metadata such as:
+  - Version
+  - Group
+  - Name
+  - License
+  - Publish details
+
+The aggregated SBOM is stored in:  
+**`data/SBOM-aggregate.csv`**
+
+---
+
+## How to Use This Tool
+
+To use the SBOM generation tool, follow these steps:
+
+1. **Clone the Repository**:
+   Clone this repository to your local machine:
+
+   ```bash
+   git clone https://github.com/<your-repo-name>/sbom-generation-tool.git
+   cd sbom-generation-tool
+   ```
+
+2. **Install Dependencies**:
+   Use `npm` to install all required dependencies:
+
+   ```bash
+   npm install
+   ```
+
+3. **Run the Tool**:
+   Execute the script to generate the SBOMs. You can use either the default repository list or provide a custom one:
+   - **Using Default Repository List**:
+     ```bash
+     bash src/generate-sbom.sh
+     ```
+   - **Using Custom Repository List**:
+     ```bash
+     bash src/generate-sbom.sh custom-repos-list.json
+     ```
+
+---
+
+## Output
+
+The results will be stored in the `data/` directory:
+
+- Individual SBOMs for each repository: **`data/sbom-repo-wise/`**
+- Aggregated SBOM for all repositories: **`data/SBOM-aggregate.csv`**
+
+---
+
+## Why Use This Tool?
+
+This SBOM generation tool ensures:
+
+- **Transparency**: By providing a clear list of dependencies and their metadata for each Mojaloop repository.
+- **Security**: By identifying all dependencies, including transitive ones, it helps identify potential vulnerabilities.
+- **Flexibility**: By allowing repository inclusion to be configured dynamically, either through a configuration file or a custom list passed via the command line.
