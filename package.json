@@ -47,6 +47,14 @@
     "snapshot": "npx standard-version --no-verify --skip.changelog --prerelease snapshot --releaseCommitMessageFormat 'chore(snapshot): {{currentTag}}'"
   },
   "dependencies": {
+    "@cyclonedx/cyclonedx-npm": "^3.0.0",
+    "axios": "^1.9.0",
+    "csv-parse": "^5.6.0",
+    "csv-parser": "^3.2.0",
+    "csv-writer": "^1.6.0",
+    "fs": "^0.0.1-security",
+    "node-fetch": "^3.3.2",
+    "p-limit": "^6.2.0",
     "pacote": "^21.0.0"
   }
 }
