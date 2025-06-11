@@ -1,6 +1,6 @@
 {
   "name": "@mojaloop/ml-depcheck-utility",
-  "version": "1.0.10",
+  "version": "1.1.0",
   "description": "Utility tool for checking deprecation status of dependencies",
   "main": "src/index.js",
   "bin": {
