@@ -32,7 +32,7 @@ fs.readdirSync(directoryPath).forEach((file) => {
       const timestamp = fields[23]
 
       const repoName = file.split('.')[0]
-      const service = repoName.substring(0, repoName.length - 5)
+      const service = repoName
 
       const versionParts = dependency.split('@')
       const version = versionParts.pop()
