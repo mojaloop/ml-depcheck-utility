@@ -285,7 +285,7 @@ jobs:
                 head -n 1 "$file" | grep -qx '#!/bin/bash' || { echo "$file missing #!/bin/bash"; exit 1; }
               fi
             done
-            echo "All files have correct shebangs!"
+            echo "All files have correct formatting!"
 
   audit-licenses:
     executor: default-docker
