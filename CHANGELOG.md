@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.1](https://github.com/mojaloop/ml-depcheck-utility/compare/v1.1.0...v1.1.1) (2025-06-17)
+
+
+### Bug Fixes
+
+* aggregate sbom file names ([adb1272](https://github.com/mojaloop/ml-depcheck-utility/commit/adb12721fceb3959440cd83e5a997ac1adab5a63))
+
 ## [1.1.0](https://github.com/mojaloop/ml-depcheck-utility/compare/v1.0.10...v1.1.0) (2025-06-11)
 
 
