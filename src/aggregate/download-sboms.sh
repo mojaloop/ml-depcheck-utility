@@ -12,42 +12,39 @@ mkdir -p "$TARGET_DIR"
 # GitHub API base
 API_URL="https://api.github.com/repos"
 
-# Helper: Get SBOM file name from GitHub API for a given pattern
+# Get the first sbom-v*.csv file name (from root of main branch)
 get_sbom_file_name() {
   local repo=$1
-  local pattern=$2
 
-  curl -s "$API_URL/$ORG/$repo/contents" | grep -oP "\"name\":\s*\"$pattern[^\"]*\.csv\"" | head -n 1 | sed -E 's/.*"([^"]+)".*/\1/'
+  curl -s "$API_URL/$ORG/$repo/contents" \
+    | jq -r '.[] | select(.name | test("^sbom-v.*\\.csv$")) | .name' \
+    | head -n 1
 }
 
 # Parse arrays from JSON
-NPM_REPOS=$(jq -r '.npm[]' "$JSON_FILE")
-YARN_REPOS=$(jq -r '.yarn[]' "$JSON_FILE")
+REPOS=$(jq -r '.repos[]' "$JSON_FILE")
 
-# Process npm repos
-for REPO in $NPM_REPOS; do
-  echo "⏳ Checking SBOM for $REPO (npm)..."
-  FILE_NAME=$(get_sbom_file_name "$REPO" "sbom")
+# Download one matching SBOM file per repo
+download_sbom_file() {
+  local repo=$1
+  local type=$2
 
-  if [ -n "$FILE_NAME" ]; then
-    curl -s -f -L "https://raw.githubusercontent.com/$ORG/$REPO/main/$FILE_NAME" -o "$TARGET_DIR/${REPO}-$FILE_NAME"
-    echo "✔ Downloaded to $TARGET_DIR/${REPO}-$FILE_NAME"
-  else
-    echo "⚠ No sbom-npm CSV found for $REPO"
-  fi
-done
+  echo "⏳ Checking SBOM for $repo ($type)..."
 
-# Process yarn repos
-for REPO in $YARN_REPOS; do
-  echo "⏳ Checking SBOM for $REPO (yarn)..."
-  FILE_NAME=$(get_sbom_file_name "$REPO" "sbom")
+  FILE_NAME=$(get_sbom_file_name "$repo")
 
   if [ -n "$FILE_NAME" ]; then
-    curl -s -f -L "https://raw.githubusercontent.com/$ORG/$REPO/main/$FILE_NAME" -o "$TARGET_DIR/${REPO}-$FILE_NAME"
-    echo "✔ Downloaded to $TARGET_DIR/${REPO}-$FILE_NAME"
+    curl -s -f -L "https://raw.githubusercontent.com/$ORG/$repo/main/$FILE_NAME" \
+      -o "$TARGET_DIR/${repo}.csv"
+    echo "✔ Downloaded $FILE_NAME to $TARGET_DIR/${repo}-$FILE_NAME"
   else
-    echo "⚠ No sbom-yarn CSV found for $REPO"
+    echo "⚠ No sbom CSV file found for $repo"
   fi
+}
+
+# Process repos
+for REPO in $REPOS; do
+  download_sbom_file "$REPO" "npm"
 done
 
 echo "✅ All done."

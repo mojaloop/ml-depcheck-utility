@@ -173,46 +173,52 @@ Generate a the SBOM effortlessly using the CLI by a single command. You can eith
 
 To use the SBOM generation tool, follow these steps:
 
-1. **Install the package**:
+1.  **Install the package**:
 
-   ```bash
-   npm install @mojaloop/ml-depcheck-utility
-   ```
+    ```bash
+    npm install @mojaloop/ml-depcheck-utility
+    ```
 
-2. **Install Dependencies**:
-   Use `npm` to install all required dependencies in the repository:
+2.  **Run the Tool**:
+    You can generate SBOMs using two modes:
 
-   ```bash
-   npm install
-   ```
+    - **For individual repositories**:Use this mode if you want to generate SBOMs for one repository at a time.
+      - **For npm-based project**:
+        ```bash
+        generate-sbom-npm
+        ```
+      - **For yarn-based projects**:
+        ```bash
+        generate-sbom-yarn
+        ```
+      - **Specifying the version**:
+        ```bash
+        generate-sbom-npm <version>
+        ```
+        ```bash
+        generate-sbom-yarn <version>
+        ```
+    - **Generate Aggregate SBOM for Multiple Repositories**: Use this mode to generate SBOMs for a list of repositories, either the default set or a custom list.
 
-3. **Run the Tool**:
-   You can generate SBOMs using two modes:
-   - **For individual repositories**:Use this mode if you want to generate SBOMs for one repository at a time.
-     - **For npm-based project**:
-       ```bash
-       generate-sbom-npm
-       ```
-     - **For yarn-based projects**:
-       ```bash
-       generate-sbom-yarn
-       ```
-     - **Specifying the version**:
-       ```bash
-       generate-sbom-npm <version>
-       ```
-       ```bash
-       generate-sbom-yarn <version>
-       ```
-   - **Generate Aggregate SBOM for Multiple Repositories**: Use this mode to generate SBOMs for a list of repositories, either the default set or a custom list.
-     - **Using Default Repository List**:
-     ```bash
-     generate-aggregate
-     ```
-     - **Using Custom Repository List**:
-     ```bash
-     generate-aggregate custom-repos-list.json
-     ```
+      - **Using Default Repository List**:
+
+      ```bash
+      generate-aggregate
+      ```
+
+      - **Using Custom Repository List**:
+
+      ```bash
+      generate-aggregate custom-repos-list.json
+      ```
+
+      Example of custom-repos-list.json
+
+      ```json
+      {
+        "repos": ["repo-one", "repo-two", "repo-three", "repo-four"]
+      }
+      ```
 
 ---
 
@@ -221,8 +227,7 @@ To use the SBOM generation tool, follow these steps:
 The results will be stored in the root directory:
 
 - `sbom.csv` : aggregate sbom
-- `sbom-npm-v<version>.csv` : sbom of a npm repository
-- `sbom-yarn-v<version>.csv` : sbom of a yarn repository
+- `sbom-v<version>.csv` : sbom of a repository
 
 ---
 

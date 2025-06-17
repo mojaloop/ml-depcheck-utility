@@ -1,5 +1,5 @@
 {
-    "npm": [
+    "repos": [
       "account-lookup-service",
       "auth-service",
       "bulk-api-adapter",
@@ -13,9 +13,7 @@
       "quoting-service",
       "thirdparty-api-svc",
       "transaction-requests-service",
-      "thirdparty-sdk"
-    ],
-    "yarn": [
+      "thirdparty-sdk",
       "sdk-scheme-adapter"
     ]
   }

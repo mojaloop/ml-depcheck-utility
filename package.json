@@ -51,9 +51,9 @@
     "snapshot": "npx standard-version --no-verify --skip.changelog --prerelease snapshot --releaseCommitMessageFormat 'chore(snapshot): {{currentTag}}'"
   },
   "dependencies": {
-    "@cyclonedx/cyclonedx-npm": "^3.0.0",
+    "@cyclonedx/cyclonedx-npm": "^3.1.0",
     "@yarnpkg/lockfile": "^1.1.0",
-    "axios": "^1.9.0",
+    "axios": "^1.10.0",
     "csv-parse": "^5.6.0",
     "csv-parser": "^3.2.0",
     "csv-writer": "^1.6.0",
