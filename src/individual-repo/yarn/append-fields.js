@@ -1,12 +1,10 @@
 const fs = require('fs')
 const axios = require('axios')
-const pLimit = require('p-limit').default
 const { createObjectCsvWriter } = require('csv-writer')
 
 const inputFile = './tmp/result-individual/SBOM.csv'
 const outputFile = './tmp/result-individual/SBOM-final.csv'
 const CONCURRENCY_LIMIT = 10
-const limit = pLimit(CONCURRENCY_LIMIT)
 
 // Read file
 fs.readFile(inputFile, 'utf8', async (err, data) => {
@@ -14,6 +12,10 @@ fs.readFile(inputFile, 'utf8', async (err, data) => {
     console.error('Error reading file:', err)
     return
   }
+
+  // Dynamically import p-limit (ESM-only)
+  const pLimit = (await import('p-limit')).default
+  const limit = pLimit(CONCURRENCY_LIMIT)
 
   const lines = data.trim().split('\n')
   const headers = lines[0].split(',')
@@ -48,11 +50,12 @@ fs.readFile(inputFile, 'utf8', async (err, data) => {
       const versionInfo = metadata.versions[version] || {}
       const email = versionInfo.author?.email || ''
       const deprecated = versionInfo.deprecated ? 'deprecated' : 'active'
-      const reason = versionInfo.deprecated || 'Active in npm registory'
+      const reason = versionInfo.deprecated || 'Active in npm registry'
       const modified = metadata.time?.modified || ''
 
       return [...row, email, deprecated, reason, modified]
     } catch (error) {
+      console.error(`Error processing ${row[bomRefIndex]}:`, error.message)
       return [...row, '', '', '', '']
     }
   })))
