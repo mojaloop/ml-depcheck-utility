@@ -1,7 +1,8 @@
 #!/bin/bash
 
 #Install xslt processor
-apk add --no-cache libxslt
+sudo apt update
+sudo apt install -y xsltproc
 
 # Get repo version from package.json
 if [ -n "$1" ]; then
