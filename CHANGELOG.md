@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.3](https://github.com/mojaloop/ml-depcheck-utility/compare/v1.1.2...v1.1.3) (2025-06-19)
+
+
+### Bug Fixes
+
+* correct xslt processor installation ([c97e8aa](https://github.com/mojaloop/ml-depcheck-utility/commit/c97e8aa146396ba93a447df88b0915de6687beb4))
+
 ### [1.1.2](https://github.com/mojaloop/ml-depcheck-utility/compare/v1.1.1...v1.1.2) (2025-06-19)
 
 
