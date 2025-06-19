@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.2](https://github.com/mojaloop/ml-depcheck-utility/compare/v1.1.1...v1.1.2) (2025-06-19)
+
+
+### Bug Fixes
+
+* use dynamic import for p-limit ([cc5a157](https://github.com/mojaloop/ml-depcheck-utility/commit/cc5a1575dd620a432983b750330cdc48de1b3038))
+
 ### [1.1.1](https://github.com/mojaloop/ml-depcheck-utility/compare/v1.1.0...v1.1.1) (2025-06-17)
 
 
